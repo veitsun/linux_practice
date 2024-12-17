@@ -6,6 +6,7 @@ private:
   int a;
 
 public:
-  int func();
+  void set(int a);
+  int get();
 };
 #endif

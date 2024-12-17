@@ -39,7 +39,11 @@ replay: clean config build
 
 play: config build
 
-runmain:
-	@./build/main ./test/ sorted.txt
+main:
+	@./build/main
 
-.PHONY: all config build clean rebuild
+test:
+	@cd test && ./compile.sh
+	
+
+.PHONY: all config build clean rebuild test
