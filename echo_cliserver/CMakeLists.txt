@@ -1,6 +1,4 @@
-
-
-include_directories(${INCLUDE_DIR})
+# include_directories(${INCLUDE_DIR})
 
 
 # 定义宏
@@ -15,4 +13,5 @@ endmacro()
 # 调用宏
 add_multiple_executables(
   helloword
+  tcpserver01
 )
