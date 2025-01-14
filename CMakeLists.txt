@@ -7,8 +7,10 @@ set(CMAKE_BUILD_TYPE "Debug" )
 Set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -DDEBUG")
 Set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
-set(INCLUDE_DIR "/home/sunwei/usr/include")
+# set(INCLUDE_DIR "./usr/include") 应该放绝对路径
+set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/myusr/include)
 list(APPEND INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+set(LIB_DIR ${CMAKE_SOURCE_DIR}/myusr/lib)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
