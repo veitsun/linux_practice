@@ -16,6 +16,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 add_subdirectory(src)
 add_subdirectory(echo_cliserver)
+add_subdirectory(client)
+add_subdirectory(server)
 
 add_executable(main main.cpp)
 target_include_directories(main PUBLIC ${INCLUDE_DIR})
