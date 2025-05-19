@@ -24,5 +24,8 @@ endmacro()
 
 # 调用宏
 add_multiple_executables(
-  hhhh
+  con_num_test
+  test_multithread_singlethread
+  test_thread_id
+  test_maverick
 )
