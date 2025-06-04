@@ -28,4 +28,5 @@ add_multiple_executables(
   test_multithread_singlethread
   test_thread_id
   test_thread_safe_stack
+  test_hierarchical_mutex
 )
