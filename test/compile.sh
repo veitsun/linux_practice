@@ -6,7 +6,7 @@ for file in *.cpp; do
     filename="${file%.cpp}"
     
     # 使用 g++ 编译成可执行文件
-    g++ "$file" -o ../app/"$filename" 
+    g++ "$file" -o ./app/"$filename" 
     
     # 检查编译是否成功
     if [ $? -eq 0 ]; then

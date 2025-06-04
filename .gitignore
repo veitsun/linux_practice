@@ -1,6 +1,6 @@
-build
-app
-.cache
-.vscode
+build/
+test/app/
+.cache/
+.vscode/
 jianli.md
 jianli_copy.md
