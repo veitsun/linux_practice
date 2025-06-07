@@ -30,4 +30,5 @@ add_multiple_executables(
   test_thread_safe_stack
   test_hierarchical_mutex
   test_threadsafe_queue
+  test_unique_lock
 )
