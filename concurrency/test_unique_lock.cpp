@@ -35,7 +35,7 @@ int main() {
     std::cout << "lock2 could not acquire the lock." << std::endl;
   }
   lock.unlock();
-  std::cout << "lock1 released the lock." << std::endl;
+  std::cout << "lock released the lock." << std::endl;
   // lock2.unlock();
 
   if (lock2.owns_lock()) {
@@ -49,13 +49,18 @@ int main() {
     std::cout << "lock2 could not acquire the lock." << std::endl;
   }
 
-  std::unique_lock<std::mutex> lock3(mtx, std::try_to_lock);
+  std::unique_lock<std::mutex> lock3(mtx, std::defer_lock);
   if (lock3.owns_lock()) {
     std::cout << "lock3 acquired the lock." << std::endl;
   } else {
     std::cout << "lock3 could not acquire the lock." << std::endl;
   }
-  lock3.unlock();
+  // 对 mtx 进行上锁操作
+  // lock3.lock();
+  // std::lock(mtx);
+  std::lock_guard<std::mutex> guard(mtx);
+
+  // lock3.unlock();
   std::cout << "----------------------------------------------------"
             << std::endl;
 
