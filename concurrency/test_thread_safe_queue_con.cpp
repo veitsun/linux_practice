@@ -85,19 +85,30 @@ void test_blocking_operations() {
   // 启动一个等待线程
   std::thread waiter(
       [&queue, &thread_started, &value_received, &received_value]() {
+        std::cout << "你先等 10 s ,ok?" << std::endl;
+        // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        std::cout << "辛苦你了，等待结束" << std::endl;
         thread_started = true;
         queue.wait_and_pop(received_value);
+        std::cout << "线程收到值: " << received_value << std::endl;
+        // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+
         value_received = true;
       });
 
   // 等待线程启动
   while (!thread_started) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::cout << "等待线程启动..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   }
+  std::cout << "你已经等完" << std::endl;
+  // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 
   // 短暂延迟确保wait_and_pop已经在等待
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   TestRunner::assert_true(!value_received, "Thread should be waiting");
+  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  std::cout << "现在推送值，唤醒等待线程" << std::endl;
 
   // 推送值应该唤醒等待线程
   queue.push("Hello World");
@@ -106,6 +117,7 @@ void test_blocking_operations() {
   TestRunner::assert_true(value_received, "Thread should have received value");
   TestRunner::assert_true(received_value == "Hello World",
                           "Received value should be 'Hello World'");
+  // std::this_thread::sleep_for(std::chrono::milliseconds(20000));
 }
 
 // 测试拷贝构造函数
@@ -130,6 +142,8 @@ void test_copy_constructor() {
 
   // 修改原始队列不应影响拷贝
   original.push(99);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
   TestRunner::assert_true(original.try_pop(val1),
                           "Original should have new element");
   TestRunner::assert_true(val1 == 2, "Original next element should be 2");
@@ -137,6 +151,8 @@ void test_copy_constructor() {
   TestRunner::assert_true(copy.try_pop(val2),
                           "Copy should have second element");
   TestRunner::assert_true(val2 == 2, "Copy next element should be 2");
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(200000));
 }
 
 // 多线程并发测试
@@ -159,20 +175,28 @@ void test_multithreaded_operations() {
   // 启动生产者线程
   for (int i = 0; i < num_producers; ++i) {
     producers.emplace_back([&queue, &total_produced, i, items_per_producer]() {
+      std::cout << "生产者线程 " << i << " 开始工作" << std::endl;
       for (int j = 0; j < items_per_producer; ++j) {
         int value = i * items_per_producer + j;
         queue.push(value);
         total_produced.fetch_add(1);
       }
+      std::cout << "生产者线程 " << i << " 完成工作" << std::endl;
     });
   }
 
   // 启动消费者线程
   for (int i = 0; i < num_consumers; ++i) {
     consumers.emplace_back([&queue, &total_consumed, &consumed_values,
-                            &consumed_mutex, num_producers,
-                            items_per_producer]() {
+                            &consumed_mutex, num_producers, items_per_producer,
+                            i]() {
+      std::cout << "消费者线程 " << i << " 开始工作" << std::endl;
       while (total_consumed.load() < num_producers * items_per_producer) {
+        if (total_consumed.load() % 1000 == 0) {
+          std::cout << "消费者线程 " << i
+                    << " 已消费: " << total_consumed.load() << " 个元素"
+                    << std::endl;
+        }
         int value;
         if (queue.try_pop(value)) {
           {
@@ -181,7 +205,7 @@ void test_multithreaded_operations() {
           }
           total_consumed.fetch_add(1);
         } else {
-          std::this_thread::sleep_for(std::chrono::microseconds(100));
+          std::this_thread::sleep_for(std::chrono::microseconds(10000));
         }
       }
     });
@@ -206,6 +230,8 @@ void test_multithreaded_operations() {
   TestRunner::assert_true(consumed_values.size() ==
                               num_producers * items_per_producer,
                           "All values should be consumed");
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(200000));
 }
 
 // 性能压力测试
@@ -213,10 +239,10 @@ void test_performance() {
   std::cout << "\n--- Testing Performance ---" << std::endl;
 
   ThreadSafeQueue<int> queue;
-  const int num_operations = 100000;
+  std::vector<std::thread> threads;
+  const int num_operations = 100;
 
   auto start = std::chrono::high_resolution_clock::now();
-
   // 单线程性能测试
   for (int i = 0; i < num_operations; ++i) {
     queue.push(i);
@@ -227,15 +253,51 @@ void test_performance() {
     queue.try_pop(value);
   }
 
+  // duo线程性能测试
+  for (int i = 0; i < num_operations; ++i) {
+    threads.emplace_back([&queue, i]() {
+      // queue.push(i);
+      int value;
+      queue.try_pop(value);
+    });
+  }
+
+  for (int i = 0; i < num_operations; ++i) {
+    threads.emplace_back([&queue, i]() {
+      // int value;
+      // queue.try_pop(value);
+      queue.push(i);
+    });
+  }
+
+  for (auto &t : threads) {
+    t.join();
+  }
+
   auto end = std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  // 为什么在中间增加了单线程测试部分，执行时间却变得更长了，
+  // 这个现象很常见
+  // 关键原因：缓存预热 + 执行模式优化
+  // 直接开启多线程，CPU缓存未预热，代码路径陌生
+  //
 
-  std::cout << "Single-threaded " << num_operations
+  // 100个try_pop线程启动，队列空 -> 大部分立即失败返回
+  // 100个push线程启动 -> 可能与部分try_pop线程竞争
+  // 线程生命周期重叠，调度复杂
+
+  // 单线程预热：push 100 -> pop 100（队列又空了）
+  // 100个try_pop线程启动，队列空 -> 立即失败，但是执行路径已优化
+  // 100个push线程启动 -> 在更优化的环境中执行
+
+  std::cout << "Duo-threaded " << num_operations
             << " push+pop operations took: " << duration.count() << "ms"
             << std::endl;
   TestRunner::assert_true(duration.count() < 5000,
                           "Operations should complete in reasonable time");
+
+  // std::this_thread::sleep_for(std::chrono::milliseconds(200000));
 }
 
 // 边界条件测试
