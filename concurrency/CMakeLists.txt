@@ -34,4 +34,5 @@ add_multiple_executables(
   test_thread_safe_queue_con
   test_async_future
   test_async_promise
+  test_async_packaged_task
 )
