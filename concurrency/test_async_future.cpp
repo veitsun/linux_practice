@@ -30,6 +30,21 @@ int main() {
 
   int value = result.get(); // 没有拿到结果会阻塞在这里
   std::cout << "异步任务完成，结果是: " << value << std::endl;
+  std::cout << "主线程继续执行...-----------------" << std::endl;
+  // 这里可以继续执行其他操作
+
+  std::future<int> result2 =
+      std::async(std::launch::deferred, heavy_computation, 20);
+
+  std::cout << "启动延迟执行的异步任务..." << std::endl;
+  for (int i = 0; i < 5; i++) {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout << "主线程时间已经过去一秒" << std::endl;
+  }
+  // 这里估计要五秒结束，要等待 10s
+  std::cout << "  // 这里估计要五秒结束，要等待 10s" << std::endl;
+  int value2 = result2.get(); // 这里才延迟调用 heavy_computation
+  std::cout << "延迟执行的异步任务完成，结果是: " << value2 << std::endl;
 
   std::cout << "主线程结束。" << std::endl;
 
