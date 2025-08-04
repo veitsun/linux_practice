@@ -15,7 +15,7 @@ macro(add_multiple_executables)
         add_executable(${executable_name} ${executable_name}.cpp)
         target_include_directories(${executable_name} PUBLIC ${INCLUDE_DIR})
         target_link_directories(${executable_name} PUBLIC ${LIB_DIR})
-        target_link_libraries(${executable_name} PRIVATE SUNWEI
+        target_link_libraries(${executable_name} PRIVATE SHAREDLIB
                                                 -Wl,--start-group
                                                 unp
                                                 pthread

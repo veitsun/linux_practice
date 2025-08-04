@@ -17,6 +17,6 @@ file(GLOB HEllOLIB_SRC_POOL ${PROJECT_SOURCE_DIR}/src/*.cpp)
 # message(STATUS "Source files found: ${HELLOLIB_SRC_POOL}")
 
 # create a  library from the collected source files
-add_library(SUNWEI SHARED ${HEllOLIB_SRC_POOL})
-target_include_directories(SUNWEI PUBLIC ${INCLUDE_DIR})
+add_library(SHAREDLIB SHARED ${HEllOLIB_SRC_POOL})
+target_include_directories(SHAREDLIB PUBLIC ${INCLUDE_DIR})
 
