@@ -45,6 +45,8 @@ int main() {
 
   // 创建多个任务
   for (int i = 5; i <= 8; ++i) {
+    // 当构造一个 std::packaged_task 时，必须传入一个函数或可调用对象
+    // 它可以接受指定的参数并且返回指定的返回类型
     std::packaged_task<long long(int)> pool_task(factorial);
     futures.push_back(pool_task.get_future());
     // 将任务移动到线程中执行
