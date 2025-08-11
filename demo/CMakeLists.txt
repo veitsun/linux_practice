@@ -25,4 +25,5 @@ endmacro()
 # 调用宏
 add_multiple_executables(
   mmap
+  pointer_table
 )
