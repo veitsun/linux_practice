@@ -20,6 +20,7 @@ add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(concurrency)
 add_subdirectory(demo)
+add_subdirectory(kernel_lab)
 
 add_executable(main main.cpp)
 target_include_directories(main PUBLIC ${INCLUDE_DIR})

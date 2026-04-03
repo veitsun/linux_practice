@@ -5,3 +5,12 @@ test/app/
 jianli.md
 jianli_copy.md
 jianli_jijiji.md
+kernel_lab/*.ko
+kernel_lab/*.o
+kernel_lab/*.mod
+kernel_lab/*.mod.c
+kernel_lab/*.mod.o
+kernel_lab/Module.symvers
+kernel_lab/modules.order
+kernel_lab/.tmp_versions/
+kernel_lab/.*.cmd
