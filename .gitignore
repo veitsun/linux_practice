@@ -10,7 +10,9 @@ kernel_lab/*.o
 kernel_lab/*.mod
 kernel_lab/*.mod.c
 kernel_lab/*.mod.o
+kernel_lab/*.mod.o.d
 kernel_lab/Module.symvers
 kernel_lab/modules.order
 kernel_lab/.tmp_versions/
 kernel_lab/.*.cmd
+compile_commands.json

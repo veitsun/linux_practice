@@ -17,14 +17,14 @@ static char greeting[MESSAGE_BUFFER_SIZE] = "hello from kernel_lab";
 static int repeat = 1;
 static char last_message[MESSAGE_BUFFER_SIZE] = "write something to /proc/kernel_lab";
 static unsigned int write_count;
-static unsigned long load_jiffies;
+static unsigned long load_jiffies;                      // 模块加载时刻
 static DEFINE_MUTEX(kernel_lab_lock);
-static struct proc_dir_entry *kernel_lab_entry;
+static struct proc_dir_entry *kernel_lab_entry;         // 用于退出时删除节点
 
 module_param_string(greeting, greeting, sizeof(greeting), 0644);
 MODULE_PARM_DESC(greeting, "Greeting text exposed by the kernel_lab module.");
 
-module_param(repeat, int, 0644);
+module_param(repeat, int, 0644);        // 表示可传一个整型
 MODULE_PARM_DESC(repeat, "Demo integer parameter that can be changed through sysfs.");
 
 static ssize_t kernel_lab_read(struct file *file,
@@ -37,9 +37,10 @@ static ssize_t kernel_lab_read(struct file *file,
     unsigned long uptime_ms;
     ssize_t length;
 
+    // 加锁后采集状态
     mutex_lock(&kernel_lab_lock);
-    uptime_ms = jiffies_to_msecs(jiffies - load_jiffies);
-    ktime_get_real_ts64(&now);
+    uptime_ms = jiffies_to_msecs(jiffies - load_jiffies);   // 模块运行时长
+    ktime_get_real_ts64(&now);                             // 获取当前实时时间
 
     length = scnprintf(buffer,
                        sizeof(buffer),
@@ -79,12 +80,12 @@ static ssize_t kernel_lab_write(struct file *file,
     buffer[copy_length] = '\0';
     strim(buffer);
 
-    mutex_lock(&kernel_lab_lock);
+    mutex_lock(&kernel_lab_lock);       // 更新共享状态并计数
     strscpy(last_message, buffer, sizeof(last_message));
     write_count++;
     mutex_unlock(&kernel_lab_lock);
 
-    pr_info("kernel_lab: updated message to \"%s\"\n", last_message);
+    pr_info("kernel_lab: updated message to \"%s\"\n", last_message);       // 打印内核日志
 
     return count;
 }
@@ -102,14 +103,15 @@ static const struct file_operations kernel_lab_proc_ops = {
 };
 #endif
 
+// 模块的初始化入口函数 （模块被加载时做一次初始化准备，成功就让模块进入可用状态，失败就终止加载）
 static int __init kernel_lab_init(void)
 {
-    load_jiffies = jiffies;
-    strscpy(last_message, greeting, sizeof(last_message));
+    load_jiffies = jiffies; // 记录模块加载时刻（内核节拍计数），后面读 /proc/kernel_lab 时用它计算模块运行时间。
+    strscpy(last_message, greeting, sizeof(last_message));  // 把初始 greeting 复制给 last_message，保证第一次读 proc 时就有可读内容。
 
     kernel_lab_entry = proc_create(PROC_ENTRY_NAME, 0666, NULL, &kernel_lab_proc_ops);
     if (!kernel_lab_entry)
-        return -ENOMEM;
+        return -ENOMEM;     // 创建失败就返回错误码，告诉内核“加载失败”，模块就不会进入已加载状态
 
     pr_info("kernel_lab: loaded, read /proc/%s to inspect the module\n", PROC_ENTRY_NAME);
     return 0;

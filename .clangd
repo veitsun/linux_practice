@@ -1,5 +1,26 @@
 CompileFlags:
+  CompilationDatabase: build
   Add: [
     "-I/usr/lib/gcc/x86_64-linux-gnu/12/include",
     "-Wno-attribute-warn",
+  ]
+---
+If:
+  PathMatch: ^kernel_lab/.*$
+CompileFlags:
+  CompilationDatabase: kernel_lab
+  Remove: [
+    "-mno-fp-ret-in-387",
+    "-mpreferred-stack-boundary=*",
+    "-mskip-rax-setup",
+    "-mindirect-branch=*",
+    "-mindirect-branch-register",
+    "-fno-allow-store-data-races",
+    "-fno-stack-clash-protection",
+    "-mrecord-mcount",
+    "-fconserve-stack",
+  ]
+  Add: [
+    "-Wno-unknown-warning-option",
+    "-Wno-unused-command-line-argument",
   ]
